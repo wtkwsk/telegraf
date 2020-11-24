@@ -175,7 +175,7 @@ func NewParser(config *Config) (Parser, error) {
 		)
 	case "value":
 		parser, err = NewValueParser(config.MetricName,
-			config.DataType, config.DefaultTags, config.ValueValueName)
+			config.DataType, config.DefaultTags, config.ValueValueField)
 	case "influx":
 		parser, err = NewInfluxParser()
 	case "nagios":
