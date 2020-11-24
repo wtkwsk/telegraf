@@ -1324,7 +1324,7 @@ func (c *Config) getParserConfig(name string, tbl *ast.Table) (*parsers.Config, 
 	c.getFieldStringSlice(tbl, "form_urlencoded_tag_keys", &pc.FormUrlencodedTagKeys)
 
 	//for value parser
-	c.getFieldString(tbl, "value_field", &pc.ValueValueName)
+	c.getFieldString(tbl, "value_value_field", &pc.ValueValueField)
 
 	pc.MetricName = name
 
