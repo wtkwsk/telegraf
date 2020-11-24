@@ -150,7 +150,7 @@ type Config struct {
 	FormUrlencodedTagKeys []string `toml:"form_urlencoded_tag_keys"`
 
 	// Custom Value name for Value field
-	ValueValueName string `toml:"value_value_name"`
+	ValueValueField string `toml:"value_value_field"`
 }
 
 // NewParser returns a Parser interface based on the given config.
