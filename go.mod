@@ -34,6 +34,7 @@ require (
 	github.com/cenkalti/backoff v2.0.0+incompatible // indirect
 	github.com/cisco-ie/nx-telemetry-proto v0.0.0-20190531143454-82441e232cf6
 	github.com/cockroachdb/apd v1.1.0 // indirect
+	github.com/confluentinc/confluent-kafka-go v1.5.2 // indirect
 	github.com/containerd/containerd v1.4.1 // indirect
 	github.com/couchbase/go-couchbase v0.0.0-20180501122049-16db1f1fe037
 	github.com/couchbase/gomemcached v0.0.0-20180502221210-0da75df14530 // indirect
@@ -143,6 +144,7 @@ require (
 	google.golang.org/api v0.20.0
 	google.golang.org/genproto v0.0.0-20200317114155-1f3552e48f24
 	google.golang.org/grpc v1.28.0
+	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.5.2
 	gopkg.in/fatih/pool.v2 v2.0.0 // indirect
 	gopkg.in/gorethink/gorethink.v3 v3.0.5
 	gopkg.in/ldap.v3 v3.1.0
