@@ -66,6 +66,7 @@ type ConfluentKafka struct {
 	// The parser will automatically be set by Telegraf core code because
 	// this plugin implements the ParserInput interface (i.e. the SetParser method)
 	parser 					parsers.Parser
+	Log 					telegraf.Logger
 }
 
 
@@ -113,12 +114,18 @@ func(c *ConfluentKafka) Init() error {
 
 
 func (c *ConfluentKafka) Gather(acc telegraf.Accumulator) error {
-
 	c.acc = acc
 
 	if !c.consuming {
 		go c.Consume()
 	}
+
+	return nil
+}
+
+func (c *ConfluentKafka) Start(acc telegraf.Accumulator) error {
+
+	c.Log.Error("START")
 
 	return nil
 }
@@ -131,7 +138,11 @@ func (c *ConfluentKafka) Consume() {
 
 		ev := c.consumer.Poll(0)
 		switch m := ev.(type) {
+
 		case *kafka.Message:
+
+			c.Log.Debugf("%% Message on %s:\n%s\n",
+					m.TopicPartition, string(m.Value))
 
 			metrics, err := c.parser.Parse(m.Value)
 			if err != nil {
@@ -140,9 +151,6 @@ func (c *ConfluentKafka) Consume() {
 			for _, metric := range metrics {
 				c.acc.AddFields(metric.Name(), metric.Fields(), metric.Tags(), metric.Time())
 			}
-
-		case kafka.PartitionEOF:
-			c.acc.AddError(fmt.Errorf("PartitionEOF %v\n", m))
 
 		case kafka.Error:
 			c.acc.AddError(fmt.Errorf("Error: %v\n", m))
