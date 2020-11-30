@@ -1,8 +1,6 @@
 package confluent_cloud
 
 import (
-	"fmt"
-
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
 	"github.com/influxdata/telegraf/plugins/parsers"
@@ -59,6 +57,8 @@ type ConfluentKafka struct {
 	SessionTimeout			int 		`toml:"session_timeout"`
 	AutoOffsetReset			string 		`toml:"auto_offset_reset"`
 
+	metricsSetBuffer		[]*[]telegraf.Metric
+
 	consumer				*kafka.Consumer
 	acc           			telegraf.Accumulator
 	consuming				bool
@@ -114,12 +114,18 @@ func(c *ConfluentKafka) Init() error {
 
 
 func (c *ConfluentKafka) Gather(acc telegraf.Accumulator) error {
-	c.acc = acc
-
+	// Start at first run
 	if !c.consuming {
 		go c.Consume()
 	}
 
+	for _, metricSet := range c.metricsSetBuffer {
+		for _, metric := range *metricSet{
+			acc.AddFields(metric.Name(), metric.Fields(), metric.Tags(), metric.Time())
+		}
+	}
+
+	c.metricsSetBuffer = nil
 	return nil
 }
 
@@ -141,19 +147,17 @@ func (c *ConfluentKafka) Consume() {
 
 		case *kafka.Message:
 
-			c.Log.Debugf("%% Message on %s:\n%s\n",
-					m.TopicPartition, string(m.Value))
+			c.Log.Debugf("%% Message on %s:\n%s\n", m.TopicPartition, string(m.Value))
 
-			metrics, err := c.parser.Parse(m.Value)
+			metricsSet, err := c.parser.Parse(m.Value)
 			if err != nil {
-				c.acc.AddError(fmt.Errorf("Error: %v\n", err))
+				c.Log.Errorf("Message parsing error: %v\n", err)
 			}
-			for _, metric := range metrics {
-				c.acc.AddFields(metric.Name(), metric.Fields(), metric.Tags(), metric.Time())
-			}
+			c.metricsSetBuffer = append(c.metricsSetBuffer, &metricsSet)
+
 
 		case kafka.Error:
-			c.acc.AddError(fmt.Errorf("Error: %v\n", m))
+			c.Log.Errorf("Error: %v\n", m)
 		}
 	}
 }
